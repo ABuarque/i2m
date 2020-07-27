@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>i2m</title>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-168256083-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-168256083-1');
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .authorInfo {
+            margin: 0 auto;
+            width: 50%;
+        }
+
+        .mainContent {
+            display: flex;
+            margin-bottom: 25;
+        }
+
+        .mainContent img {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="authorInfo">
+        <h1>i2m</h1>
+        <div class="mainContent">
+            <img src="/static/profile.jpeg" height="128" width="128">
+            <div>
+                <p><strong>Aurélio Buarque</strong></p>
+                <p>Backend, DevOps and distributed systems</p>
+                <a target="_blank" href="https://github.com/ABuarque"><i class="fa fa-github"
+                        style="font-size:36px"></i></a>
+                <a target="_blank" href="https://twitter.com/BuarqueAurelio"><i class="fa fa-twitter"
+                        style="font-size:36px"></i></a>
+                <a target="_blank" href="https://medium.com/@abuarquemf"><i class="fa fa-medium"
+                        style="font-size:36px"></i></a>
+            </div>
+        </div>
+        <div>
+            {{ range .Posts }}
+            <div>
+                <hr style="margin-top: 2rem;">
+                <a href={{.Link}}>
+                    <h2>{{ .Title }}</h2>
+                </a>
+                <p>{{ .Date }}</p>
+                <p>{{ .Description }}</p>
+            </div>
+            {{ end }}
+        </div>
+    </section>
+</body>
+
+</html>

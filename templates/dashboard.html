@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>i2m</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        .posts {
+            margin: 0 auto;
+            width: 50%;
+        }
+
+        .createPostButton {
+            padding-bottom: 1rem;
+            align-content: space-between;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="posts">
+        <div class="createPostButton">
+            <form method="POST" enctype="multipart/form-data" action="/new_post?authorization={{.Authorization}}">
+                <input type="submit" value="Novo" style="align-self: center;">
+            </form>
+        </div>
+        <table style="width:100%">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Date</th>
+            </tr>
+            {{ range .Posts }}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.Title}}</td>
+                <td>{{.Date}}</td>
+            </tr>
+            {{ end }}
+        </table>
+    </section>
+</body>
+
+</html>

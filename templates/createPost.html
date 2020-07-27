@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>i2m</title>
+    <style>
+        .newPost {
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="newPost">
+        <form method="POST" enctype="multipart/form-data" action="/create_post?authorization={{.Authorization}}">
+            <h1>Novo Post</h1>
+            <p>
+                <label for="name_title">Título</label>
+                <input id="name_title" name="title" required="required" type="text" placeholder="Title...">
+            </p>
+            <p>
+                <label for="name_content">Info</label>
+                <input id="name_content" name="info" required="required" type="text" placeholder="Full text..">
+            </p>
+            <p>
+                <label for="name_content">Link</label>
+                <input id="name_content" name="link" required="required" type="text" placeholder="https://..">
+            </p>
+            <p>
+                <input type="submit" value="ENVIAR" style="align-self: center;">
+            </p>
+        </form>
+    </section>
+</body>
+
+</html>
