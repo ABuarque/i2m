@@ -1,12 +1,13 @@
 package db
 
 import (
+	"context"
 	"fmt"
-	"strings"
 	"time"
 
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
@@ -34,50 +35,76 @@ type Post struct {
 	CreatedAt time.Time `json:"createdAt" bson:"createdAt"`
 }
 
+const (
+	timeout = 15 // in seconds
+)
+
 //Client manages all iteractions with mongodb
 type Client struct {
-	client *mgo.Database
+	client *mongo.Client
 	dbName string
 }
 
 //New returns an db connection instance that can be used for CRUD opetations
-func New(url, database string) (*Client, error) {
-	session, err := mgo.Dial(url)
+func New(dbURL, dbName string) (*Client, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dbURL))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to connect to MongoDB at link [%s], error %v", dbURL, err)
 	}
-	c := session.DB(database)
-	c.C(usersCollection).EnsureIndex(mgo.Index{Key: []string{"email"}, Unique: true})
 	return &Client{
-		client: session.DB(database),
-		dbName: database,
+		client: client,
+		dbName: dbName,
 	}, nil
 }
 
 // FindByEmail finds an user with email
 func (db *Client) FindByEmail(email string) (*User, error) {
-	var profile User
-	err := db.client.C(usersCollection).Find(bson.M{"email": email}).One(&profile)
-	if err != nil {
-		return nil, fmt.Errorf("email %s not found on database, got error %q", email, err)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+	var user User
+	filter := bson.M{"email": email}
+	if err := db.client.Database(db.dbName).Collection(usersCollection).FindOne(ctx, filter).Decode(&user); err != nil {
+		return nil, fmt.Errorf("failed to fetch user from DB, error %v", err)
 	}
-	return &profile, nil
+	return &user, nil
 }
 
 // SaveUser saves a new user
 func (db *Client) SaveUser(user *User) (*User, error) {
-	return user, db.client.C(usersCollection).Insert(user)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+	if _, err := db.client.Database(db.dbName).Collection(usersCollection).InsertOne(ctx, user); err != nil {
+		return nil, fmt.Errorf("failed to persist user data into db, error %v", err)
+	}
+	return user, nil
 }
 
 // SavePost saves a new post
 func (db *Client) SavePost(post *Post) (*Post, error) {
-	return post, db.client.C(postsCollection).Insert(post)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+	if _, err := db.client.Database(db.dbName).Collection(postsCollection).InsertOne(ctx, post); err != nil {
+		return nil, fmt.Errorf("failed to persist post data into db, error %v", err)
+	}
+	return post, nil
 }
 
 // GetPosts retrieve all posts
 func (db *Client) GetPosts() ([]Post, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
 	var posts []Post
-	sortBy := []string{"-createdAt"}
-	err := db.client.C(postsCollection).Find(bson.M{}).Sort(strings.Join(sortBy, ",")).All(&posts)
-	return posts, err
+	filter := bson.M{}
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{"createdAt", -1}})
+	cursor, err := db.client.Database(db.dbName).Collection(postsCollection).Find(ctx, filter, findOptions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get posts from db, error %v", err)
+	}
+	if err = cursor.All(ctx, &posts); err != nil {
+		return nil, fmt.Errorf("failed to get posts from db, error %v", err)
+	}
+	return posts, nil
 }
