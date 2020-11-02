@@ -35,6 +35,7 @@ func loginAPIHandler(client *db.Client, authService *auth.Auth) echo.HandlerFunc
 		}
 		match, err := encryption.Check(password, u.Password)
 		if err != nil || !match {
+			log.Printf("password mismatch, error %v\n", err)
 			return c.HTML(http.StatusOK, "<h1>Error</h1>")
 		}
 		authorization, err := authService.GetToken(&auth.TokenClaims{ID: u.ID, Email: u.Email})

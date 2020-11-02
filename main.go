@@ -17,11 +17,11 @@ func main() {
 		log.Fatal("missing SECRET environment variable")
 	}
 	authService := auth.New(authSecret)
-	dbURL := os.Getenv("MONGODB_URI")
+	dbURL := os.Getenv("DB_URL")
 	if dbURL == "" {
 		log.Fatal("missing MONGODB_URI environment variable")
 	}
-	dbName := os.Getenv("MONGO_NAME")
+	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
 		log.Fatal("missing MONGO_NAME environment variable")
 	}
