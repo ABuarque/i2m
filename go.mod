@@ -1,9 +1,10 @@
 module github.com/ABuarque/i2m
 
+// +heroku goVersion go1.13
 go 1.13
 
 require (
-	github.com/candidatos-info/descritor v1.0.0
+	github.com/candidatos-info/descritor v1.0.0 // indirect
 	github.com/dghubble/go-twitter v0.0.0-20190719072343-39e5462e111f
 	github.com/dghubble/oauth1 v0.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -11,5 +12,5 @@ require (
 	github.com/labstack/gommon v0.3.0 // indirect
 	go.mongodb.org/mongo-driver v1.3.2
 	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5
-	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
+	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 // indirect
 )
