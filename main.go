@@ -11,18 +11,12 @@ import (
 	"github.com/labstack/echo"
 )
 
-var client *db.Client
-
-var a *auth.Auth
-
-var t *twitter.Client
-
 func main() {
 	authSecret := os.Getenv("SECRET")
 	if authSecret == "" {
 		log.Fatal("missing SECRET environment variable")
 	}
-	a = auth.New(authSecret)
+	authService := auth.New(authSecret)
 	dbURL := os.Getenv("MONGODB_URI")
 	if dbURL == "" {
 		log.Fatal("missing MONGODB_URI environment variable")
@@ -31,12 +25,11 @@ func main() {
 	if dbName == "" {
 		log.Fatal("missing MONGO_NAME environment variable")
 	}
-	c, err := db.New(dbURL, dbName)
+	client, err := db.New(dbURL, dbName)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("failed to connect with data base: %q", err))
 	}
 	log.Println("connected to data base!")
-	client = c
 	apiKey := os.Getenv("TWITTER_API_KEY")
 	if apiKey == "" {
 		log.Fatal("missing TWITTER_API_KEY environment variable")
@@ -53,15 +46,15 @@ func main() {
 	if accessToken == "" {
 		log.Fatal("missing TWITTER_ACESS_TOKEN_SECRET environment variable")
 	}
-	t = twitter.NewClient(apiKey, apiSecret, accessToken, accessTokenSecret)
+	twitterService := twitter.NewClient(apiKey, apiSecret, accessToken, accessTokenSecret)
 	e := echo.New()
 	e.Static("/static", "templates/assets")
-	e.GET("/", homeHandler)
+	e.GET("/", homeHandler(client))
 	e.GET("/login", loginHandler)
-	e.POST("/login", loginAPIHandler)
-	e.GET("/dashboard", dashboardHandler)
-	e.POST("/new_post", createPostPage)
-	e.POST("/create_post", createPostHandler)
+	e.POST("/login", loginAPIHandler(client, authService))
+	e.GET("/dashboard", dashboardHandler(client, authService))
+	e.POST("/new_post", createPostPage(authService))
+	e.POST("/create_post", createPostHandler(client, authService, twitterService))
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("missing PORT environment variable")
